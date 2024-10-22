@@ -1,6 +1,6 @@
 {
-    "line": "Q",
-    "station": "Church Av",
+    "line": "2",
+    "station": "Atlantic Av-Barclays Ctr",
     "direction": "uptown",
-    "mode": "only"
+    "mode": "any"
 }
