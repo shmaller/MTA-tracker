@@ -5,6 +5,13 @@ Nicholas Boni
 import json, time, datetime
 from nyct_gtfs import NYCTFeed
 
+def read_config():
+
+    with open('config.json') as f:
+        config_dict = json.load(f)
+
+    return config_dict
+
 def update_config():
     print('\nLet\'s set your preferred train line and station.\n\
           Note that the line goes by color, so e.g., you can specify \n\
@@ -28,6 +35,32 @@ def update_config():
     print('\nSaved! New config:\n')
     print(json.dumps(config_dict) + '\n')
     time.sleep(1)
+
+    return None
+
+def help():
+
+    print_title_card()
+
+    confirm = input('Do you want a station reference for your selected train line (y/n)? ')
+
+    if confirm == 'y':
+        config_dict = read_config()
+        print(f'\nSTATION NAMES FOR THE {config_dict['line']} TRAIN\n')
+        previous = ''
+
+        with open('stops.txt') as f:
+            for line in f:
+                line_list = line.split(',')
+                if line_list[0][0] == config_dict['line']:
+                    station_name = line_list[2]
+                    if station_name == previous:
+                        continue
+                    previous = station_name
+                    print(f'{line_list[2]}')
+
+        print()
+        time.sleep(1)
 
     return None
 
@@ -66,7 +99,6 @@ def query_station_arrivals():
 
         for stop in remaining_stops:
             if station == stop.stop_name:
-                print(stop)
                 eta = stop.arrival.strftime('%I:%M %p')
                 countdown = int( ( stop.arrival - datetime.datetime.now() ).total_seconds() / 60 )
                 arrival_times.append(eta)
@@ -81,7 +113,10 @@ def query_station_arrivals():
     sorted_countdown_keys = sorted(countdown_dict)
     
     for key in sorted_countdown_keys:
-        print(countdown_dict[key])
+        if key < 0:
+            print(f'Canceled: {countdown_dict[key]}')
+        else:
+            print(countdown_dict[key])
 
     return arrival_times
 
@@ -94,17 +129,20 @@ def handle_user_input():
     elif command == 'update':
         query_station_arrivals()
 
+    elif command == 'help':
+        help()
+
     elif command == 'quit':
         quit()
 
     else:
-        print('Command not recognized.')
+        print('Command not recognized. Type "help" for available commands.')
         time.sleep(1)
         handle_user_input()
 
 def print_title_card():
 
-    title_copy='**************************************************\n\
+    title_copy='\n**************************************************\n\
 Nick\'s MTA tracker\n\
 \n\
 This tool tracks train times.\n\
@@ -112,6 +150,7 @@ This tool tracks train times.\n\
 Type "config" to set your preferred station.\n\
 Type "update" to get the latest arrival times\n\
     to your preferred station.\n\
+Type "help" for help.\n\
 Type "quit" to exit the program.\n\
 **************************************************\n'
 
