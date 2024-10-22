@@ -40,13 +40,11 @@ def query_station_arrivals():
         direction = config_dict['direction']
         mode = config_dict['mode']
         
-
     if mode == 'only':
-        feed = NYCTFeed(line).filter_trips(line_id=line)
+        trains = NYCTFeed(line).filter_trips(line_id=line)
     else:
-        feed = NYCTFeed(line)
+        trains = NYCTFeed(line).trips
 
-    trains = feed.trips
     arrival_times = []
     outstr = ''
 
@@ -62,10 +60,10 @@ def query_station_arrivals():
         for stop in remaining_stops:
             if station == stop.stop_name:
                 eta = stop.arrival.strftime('%I:%M %p')
-                diff = int( (stop.arrival - datetime.datetime.now()).total_seconds() /60 )
+                diff = int( ( stop.arrival - datetime.datetime.now() ).total_seconds() / 60 )
                 arrival_times.append(eta)
 
-                outstr += f'{eta} (in {diff} min): currently at {remaining_stops[0].stop_name}\n'
+                outstr += f'{eta} (in {diff} min): {train.__str__().split(',')[0]} currently at {remaining_stops[0].stop_name}\n'
 
     print(outstr)
 
@@ -108,3 +106,6 @@ def main():
 
     while True:
         handle_user_input()
+
+if __name__ == '__main__':
+    main()
