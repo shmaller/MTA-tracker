@@ -46,26 +46,42 @@ def query_station_arrivals():
         trains = NYCTFeed(line).trips
 
     arrival_times = []
+    countdown_dict = {}
     outstr = ''
 
     for train in trains:
-        if ( direction == 'uptown' and 'Southbound' in train.__str__() ) \
-              or ( direction == 'downtown' and 'Northbound' in train.__str__() ):
+
+        # Sometimes trains with invalid metadata
+        # can cause a ValueError.
+        try:
+            train_name = train.__str__().split(',')[0]
+        except ValueError:
             continue
 
-        print(train)
+        if ( direction == 'uptown' and 'Southbound' in train_name ) \
+              or ( direction == 'downtown' and 'Northbound' in train_name ):
+            continue
 
         remaining_stops = train.stop_time_updates
 
         for stop in remaining_stops:
             if station == stop.stop_name:
+                print(stop)
                 eta = stop.arrival.strftime('%I:%M %p')
-                diff = int( ( stop.arrival - datetime.datetime.now() ).total_seconds() / 60 )
+                countdown = int( ( stop.arrival - datetime.datetime.now() ).total_seconds() / 60 )
                 arrival_times.append(eta)
+                outstr = f'{eta} (in {countdown} min): {train_name}, currently at {remaining_stops[0].stop_name}.\n'
+                countdown_dict[countdown] = outstr
 
-                outstr += f'{eta} (in {diff} min): {train.__str__().split(',')[0]} currently at {remaining_stops[0].stop_name}\n'
-
-    print(outstr)
+    if mode == 'any':
+        print(f'\nARRIVAL TIMES FOR: any train on the {line} line at {station}\n')
+    else:
+        print(f'\nARRIVAL TIMES FOR: only {line} trains at {station}\n')
+    
+    sorted_countdown_keys = sorted(countdown_dict)
+    
+    for key in sorted_countdown_keys:
+        print(countdown_dict[key])
 
     return arrival_times
 
