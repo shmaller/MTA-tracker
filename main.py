@@ -156,25 +156,25 @@ def query_station_arrivals():
 #     stops = {}
 #     trip_train = trip.trip_id.split('..')[0][-1]
     
-    with open('google_transit/stop_times.txt') as f:
-        for line in f:
-            line_list = line.split(',')
-            line_trip_id = line_list[0]
+#     with open('google_transit/stop_times.txt') as f:
+#         for line in f:
+#             line_list = line.split(',')
+#             line_trip_id = line_list[0]
 
-            print('searching file for route...')
-            if trip_train != line_trip_id.split('..')[0][-1].strip():
-                continue
-            print('found.')
+#             print('searching file for route...')
+#             if trip_train != line_trip_id.split('..')[0][-1].strip():
+#                 continue
+#             print('found.')
 
-            line_stop_id = line_list[1]
-            line_stop_index = line_list[-1].strip()
+#             line_stop_id = line_list[1]
+#             line_stop_index = line_list[-1].strip()
 
-            if trip.trip_id in line_trip_id:
-                input(f'stop {line_list[-1].strip()}: {stop_id_to_stop_name(line_list[1])}')
-                stops[line_list[-1].strip()] = stop_id_to_stop_name(line_list[1])
+#             if trip.trip_id in line_trip_id:
+#                 input(f'stop {line_list[-1].strip()}: {stop_id_to_stop_name(line_list[1])}')
+#                 stops[line_list[-1].strip()] = stop_id_to_stop_name(line_list[1])
             
-    print(stops)
-    return stops
+#     print(stops)
+#     return stops
 
 def stop_id_to_stop_name(stop_id):
     """Converts stop ID to user-friendly stop name. If ID not found, 
