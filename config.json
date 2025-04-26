@@ -1,6 +1,6 @@
 {
-    "line": "2",
-    "station": "Atlantic Av-Barclays Ctr",
-    "direction": "uptown",
-    "mode": "any"
+    "line": "E",
+    "station": "World Trade Center",
+    "direction": "downtown",
+    "mode": "only"
 }

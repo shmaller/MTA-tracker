@@ -2,7 +2,7 @@
 Nicholas Boni
 10/21/2024
 '''
-import json, time, datetime
+import json, time, datetime, os
 from nyct_gtfs import NYCTFeed
 
 def read_config():
@@ -13,6 +13,7 @@ def read_config():
     return config_dict
 
 def update_config():
+
     print('\nLet\'s set your preferred train line and station.\n\
           Note that the line goes by color, so e.g., you can specify \n\
           A, C, or E, and you will get updates for the ACE line.\n')
@@ -33,7 +34,7 @@ def update_config():
         f.write( json.dumps(config_dict, indent=4) )
 
     print('\nSaved! New config:\n')
-    print(json.dumps(config_dict) + '\n')
+    print(json.dumps(config_dict, indent=4) + '\n')
     time.sleep(1)
 
     return None
@@ -49,7 +50,10 @@ def help():
         print(f'\nSTATION NAMES FOR THE {config_dict['line']} TRAIN\n')
         previous = ''
 
-        with open('stops.txt') as f:
+        trips = NYCTFeed(config_dict['line']).trips
+        list_trip_stops(trips[0])
+
+        with open('google_transit/stops.txt') as f:
             for line in f:
                 line_list = line.split(',')
                 if line_list[0][0] == config_dict['line']:
@@ -89,21 +93,22 @@ def query_station_arrivals():
             # print(trip)
             train_name = trip.__str__().split(',')[0]
         except ValueError:
+            print('A train with invalid metadata was ignored.')
             continue
 
         if ( direction == 'uptown' and 'Southbound' in train_name ) \
               or ( direction == 'downtown' and 'Northbound' in train_name ):
             continue
 
-        remaining_stops = train.stop_time_updates
-
-        for stop in remaining_stops:
-            if station == stop.stop_name:
-                eta = stop.arrival.strftime('%I:%M %p')
-                countdown = int( ( stop.arrival - datetime.datetime.now() ).total_seconds() / 60 )
-                arrival_times.append(eta)
-                outstr = f'{eta} (in {countdown} min): {train_name}, currently at {remaining_stops[0].stop_name}.\n'
-                countdown_dict[countdown] = outstr
+        if trip.headed_to_stop( stop_name_to_stop_id(station) ):
+            remaining_stops = trip.stop_time_updates
+            for stop in remaining_stops:
+                if station == stop.stop_name:
+                    eta = stop.arrival.strftime('%I:%M %p')
+                    countdown = int( ( stop.arrival - datetime.datetime.now() ).total_seconds() / 60 )
+                    arrival_times.append(eta)
+                    outstr = f'{eta} (in {countdown} min): {train_name}, currently at {remaining_stops[0].stop_name}.\n'
+                    countdown_dict[countdown] = outstr
 
     if mode == 'any':
         print(f'\nARRIVAL TIMES FOR: any train on the {line} line at {station}\n')
@@ -120,14 +125,75 @@ def query_station_arrivals():
 
     return arrival_times
 
+def list_trip_stops(trip):
+    stops = {}
+    trip_train = trip.trip_id.split('..')[0][-1]
+    
+    with open('google_transit/stop_times.txt') as f:
+        for line in f:
+            line_list = line.split(',')
+            line_trip_id = line_list[0]
+
+            print('searching file for route...')
+            if trip_train != line_trip_id.split('..')[0][-1].strip():
+                continue
+            print('found.')
+
+            line_stop_id = line_list[1]
+            line_stop_index = line_list[-1].strip()
+
+            if trip.trip_id in line_trip_id:
+                input(f'stop {line_list[-1].strip()}: {stop_id_to_stop_name(line_list[1])}')
+                stops[line_list[-1].strip()] = stop_id_to_stop_name(line_list[1])
+            
+    print(stops)
+    return stops
+
+def stop_id_to_stop_name(stop_id):
+
+    with open('google_transit/stops.txt') as f:
+        for line in f:
+            line_list = line.split(',')
+
+            if line_list[0] == stop_id:
+                return line_list[1]
+
+    return ''
+
+def stop_name_to_stop_id(stop_name):
+    with open('config.json') as f:
+        config_dict = json.load(f)
+
+    with open('google_transit/stops.txt') as f:
+        for line in f:
+            line_list = line.split(',')
+
+            if line_list[-1].strip() == '':
+                continue
+
+            if config_dict['direction'] == 'uptown' and not 'N' in line_list[0]:
+                continue
+
+            if config_dict['direction'] == 'downtown' and not 'S' in line_list[0]:
+                continue
+
+            if line_list[1] == stop_name:
+                return line_list[0]
+
+    return ''
+
 def handle_user_input():
     command = input('What would you like to do? ').lower()
     
     if command == 'config':
-        update_config()
+        print('Your current config is: ')
+        print(read_config())
+        if input('Update? ').lower() == 'y':
+            update_config()
     
     elif command == 'update':
         query_station_arrivals()
+        # new_query()
 
     elif command == 'help':
         help()
@@ -137,7 +203,6 @@ def handle_user_input():
 
     else:
         print('Command not recognized. Type "help" for available commands.')
-        time.sleep(1)
         handle_user_input()
 
 def print_title_card():
@@ -158,6 +223,9 @@ Type "quit" to exit the program.\n\
     
 def main():
     print_title_card()
+
+    if not os.path.isfile('config.json'):
+        update_config()
 
     while True:
         handle_user_input()
