@@ -40,11 +40,10 @@ def update_config():
     direction = input("Which direction do you care about, uptown or downtown? ")
     # mode = input("Type 'any' if any train on that line will do. Type 'only' if you only care about the train specified. ")
 
-    with open('config.json', 'r') as f:
-        config_dict = json.load(f)
-        config_dict['line'] = line.upper()
-        config_dict['station'] = station
-        config_dict['direction'] = direction
+    config_dict = {}
+    config_dict['line'] = line.upper()
+    config_dict['station'] = station
+    config_dict['direction'] = direction
     # config_dict['mode'] = mode
 
     with open('config.json', 'w') as f:
@@ -94,11 +93,10 @@ def help():
 
 def query_station_arrivals():
 
-    with open('config.json') as f:
-        config_dict = json.load(f)
-        line = config_dict['line']
-        station = config_dict['station']
-        direction = config_dict['direction']
+    config_dict = read_config()
+    line = config_dict['line']
+    station = config_dict['station']
+    direction = config_dict['direction']
     # mode = config_dict['mode']
         
     # if mode == 'only':
