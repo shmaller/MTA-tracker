@@ -74,20 +74,20 @@ def query_station_arrivals():
         mode = config_dict['mode']
         
     if mode == 'only':
-        trains = NYCTFeed(line).filter_trips(line_id=line)
+        trips = NYCTFeed(line).filter_trips(line_id=line)
     else:
-        trains = NYCTFeed(line).trips
+        trips = NYCTFeed(line).trips
 
     arrival_times = []
     countdown_dict = {}
     outstr = ''
 
-    for train in trains:
-
+    for trip in trips:
         # Sometimes trains with invalid metadata
         # can cause a ValueError.
         try:
-            train_name = train.__str__().split(',')[0]
+            # print(trip)
+            train_name = trip.__str__().split(',')[0]
         except ValueError:
             continue
 
