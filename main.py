@@ -2,7 +2,11 @@
 Nicholas Boni
 10/21/2024
 '''
-import json, time, datetime, os
+import json
+import time
+import datetime
+import os
+
 from nyct_gtfs import NYCTFeed
 
 def read_config():
