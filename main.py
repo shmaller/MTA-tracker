@@ -10,6 +10,13 @@ import os
 from nyct_gtfs import NYCTFeed
 
 def read_config():
+    """Reads JSON data from `config.json`.
+
+    Returns:
+        Dict: Dictionary of program configuration.
+            Keys: "line", "station", "direction", "mode".
+            ("mode" currently unused.)
+    """    
 
     with open('config.json') as f:
         config_dict = json.load(f)
