@@ -25,14 +25,14 @@ def update_config():
     line = input("Which train line do you want to track? ")
     station = input("Which station do you want to track? ")
     direction = input("Which direction do you care about, uptown or downtown? ")
-    mode = input("Type 'any' if any train on that line will do. Type 'only' if you only care about the train specified. ")
+    # mode = input("Type 'any' if any train on that line will do. Type 'only' if you only care about the train specified. ")
 
     with open('config.json', 'r') as f:
         config_dict = json.load(f)
         config_dict['line'] = line.upper()
         config_dict['station'] = station
         config_dict['direction'] = direction
-        config_dict['mode'] = mode
+    # config_dict['mode'] = mode
 
     with open('config.json', 'w') as f:
         f.write( json.dumps(config_dict, indent=4) )
@@ -81,12 +81,12 @@ def query_station_arrivals():
         line = config_dict['line']
         station = config_dict['station']
         direction = config_dict['direction']
-        mode = config_dict['mode']
+    # mode = config_dict['mode']
         
-    if mode == 'only':
-        trips = NYCTFeed(line).filter_trips(line_id=line)
-    else:
-        trips = NYCTFeed(line).trips
+    # if mode == 'only':
+    trips = NYCTFeed(line).filter_trips(line_id=line)
+    # else:
+    #     trips = NYCTFeed(line).trips
 
     arrival_times = []
     countdown_dict = {}
@@ -116,9 +116,9 @@ def query_station_arrivals():
                     outstr = f'{eta} (in {countdown} min): {train_name}, currently at {remaining_stops[0].stop_name}.\n'
                     countdown_dict[countdown] = outstr
 
-    if mode == 'any':
-        print(f'\nARRIVAL TIMES FOR: any train on the {line} line at {station}\n')
-    else:
+    # if mode == 'any':
+    #     print(f'\nARRIVAL TIMES FOR: any train on the {line} line at {station}\n')
+    # else:
         print(f'\nARRIVAL TIMES FOR: only {line} trains at {station}\n')
     
     sorted_countdown_keys = sorted(countdown_dict)
