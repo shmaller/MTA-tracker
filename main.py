@@ -17,6 +17,12 @@ def read_config():
     return config_dict
 
 def update_config():
+    """Prompts user for input to update program configuration,
+    then writes new configuration to `config.json`.
+
+    Returns:
+        None.
+    """    
 
     print('\nLet\'s set your preferred train line and station.\n\
           Note that the line goes by color, so e.g., you can specify \n\
@@ -44,6 +50,11 @@ def update_config():
     return None
 
 def help():
+    """Prints title card which contains method names.
+
+    Returns:
+        None.
+    """    
 
     print_title_card()
 
@@ -131,9 +142,14 @@ def query_station_arrivals():
 
     return arrival_times
 
-def list_trip_stops(trip):
-    stops = {}
-    trip_train = trip.trip_id.split('..')[0][-1]
+# def list_trip_stops(trip):
+    """Currently unused. Should return list of stops for a particular trip.
+
+    Returns:
+        TBD.
+    """    
+#     stops = {}
+#     trip_train = trip.trip_id.split('..')[0][-1]
     
     with open('google_transit/stop_times.txt') as f:
         for line in f:
@@ -156,6 +172,15 @@ def list_trip_stops(trip):
     return stops
 
 def stop_id_to_stop_name(stop_id):
+    """Converts stop ID to user-friendly stop name. If ID not found, 
+    returns empty string.
+
+    Args:
+        stop_id (str): Stop ID code (e.g., 101N).
+
+    Returns:
+        str: Stop name (e.g., Van Cortland Park-242nd St)
+    """    
 
     with open('google_transit/stops.txt') as f:
         for line in f:
@@ -189,6 +214,12 @@ def stop_name_to_stop_id(stop_name):
     return ''
 
 def handle_user_input():
+    """Prompts user for input and calls appropriate method.
+
+    Returns:
+        None.
+    """    
+
     command = input('What would you like to do? ').lower()
     
     if command == 'config':
@@ -212,6 +243,11 @@ def handle_user_input():
         handle_user_input()
 
 def print_title_card():
+    """Prints title card with instructions.
+
+    Returns:
+        None.
+    """    
 
     title_copy='\n**************************************************\n\
 Nick\'s MTA tracker\n\
