@@ -2,10 +2,21 @@
 Nicholas Boni
 10/21/2024
 '''
-import json, time, datetime, os
+import json
+import time
+import datetime
+import os
+
 from nyct_gtfs import NYCTFeed
 
 def read_config():
+    """Reads JSON data from `config.json`.
+
+    Returns:
+        Dict: Dictionary of program configuration.
+            Keys: "line", "station", "direction", "mode".
+            ("mode" currently unused.)
+    """    
 
     with open('config.json') as f:
         config_dict = json.load(f)
@@ -13,6 +24,12 @@ def read_config():
     return config_dict
 
 def update_config():
+    """Prompts user for input to update program configuration,
+    then writes new configuration to `config.json`.
+
+    Returns:
+        None.
+    """    
 
     print('\nLet\'s set your preferred train line and station.\n\
           Note that the line goes by color, so e.g., you can specify \n\
@@ -21,14 +38,13 @@ def update_config():
     line = input("Which train line do you want to track? ")
     station = input("Which station do you want to track? ")
     direction = input("Which direction do you care about, uptown or downtown? ")
-    mode = input("Type 'any' if any train on that line will do. Type 'only' if you only care about the train specified. ")
+    # mode = input("Type 'any' if any train on that line will do. Type 'only' if you only care about the train specified. ")
 
-    with open('config.json', 'r') as f:
-        config_dict = json.load(f)
-        config_dict['line'] = line.upper()
-        config_dict['station'] = station
-        config_dict['direction'] = direction
-        config_dict['mode'] = mode
+    config_dict = {}
+    config_dict['line'] = line.upper()
+    config_dict['station'] = station
+    config_dict['direction'] = direction
+    # config_dict['mode'] = mode
 
     with open('config.json', 'w') as f:
         f.write( json.dumps(config_dict, indent=4) )
@@ -40,9 +56,15 @@ def update_config():
     return None
 
 def help():
+    """Prints title card which contains method names.
+
+    Returns:
+        None.
+    """    
 
     print_title_card()
 
+    '''
     confirm = input('Do you want a station reference for your selected train line (y/n)? ')
 
     if confirm == 'y':
@@ -65,22 +87,22 @@ def help():
 
         print()
         time.sleep(1)
+    '''
 
     return None
 
 def query_station_arrivals():
 
-    with open('config.json') as f:
-        config_dict = json.load(f)
-        line = config_dict['line']
-        station = config_dict['station']
-        direction = config_dict['direction']
-        mode = config_dict['mode']
+    config_dict = read_config()
+    line = config_dict['line']
+    station = config_dict['station']
+    direction = config_dict['direction']
+    # mode = config_dict['mode']
         
-    if mode == 'only':
-        trips = NYCTFeed(line).filter_trips(line_id=line)
-    else:
-        trips = NYCTFeed(line).trips
+    # if mode == 'only':
+    trips = NYCTFeed(line).filter_trips(line_id=line)
+    # else:
+    #     trips = NYCTFeed(line).trips
 
     arrival_times = []
     countdown_dict = {}
@@ -110,9 +132,9 @@ def query_station_arrivals():
                     outstr = f'{eta} (in {countdown} min): {train_name}, currently at {remaining_stops[0].stop_name}.\n'
                     countdown_dict[countdown] = outstr
 
-    if mode == 'any':
-        print(f'\nARRIVAL TIMES FOR: any train on the {line} line at {station}\n')
-    else:
+    # if mode == 'any':
+    #     print(f'\nARRIVAL TIMES FOR: any train on the {line} line at {station}\n')
+    # else:
         print(f'\nARRIVAL TIMES FOR: only {line} trains at {station}\n')
     
     sorted_countdown_keys = sorted(countdown_dict)
@@ -125,31 +147,45 @@ def query_station_arrivals():
 
     return arrival_times
 
-def list_trip_stops(trip):
-    stops = {}
-    trip_train = trip.trip_id.split('..')[0][-1]
+# def list_trip_stops(trip):
+    """Currently unused. Should return list of stops for a particular trip.
+
+    Returns:
+        TBD.
+    """    
+#     stops = {}
+#     trip_train = trip.trip_id.split('..')[0][-1]
     
-    with open('google_transit/stop_times.txt') as f:
-        for line in f:
-            line_list = line.split(',')
-            line_trip_id = line_list[0]
+#     with open('google_transit/stop_times.txt') as f:
+#         for line in f:
+#             line_list = line.split(',')
+#             line_trip_id = line_list[0]
 
-            print('searching file for route...')
-            if trip_train != line_trip_id.split('..')[0][-1].strip():
-                continue
-            print('found.')
+#             print('searching file for route...')
+#             if trip_train != line_trip_id.split('..')[0][-1].strip():
+#                 continue
+#             print('found.')
 
-            line_stop_id = line_list[1]
-            line_stop_index = line_list[-1].strip()
+#             line_stop_id = line_list[1]
+#             line_stop_index = line_list[-1].strip()
 
-            if trip.trip_id in line_trip_id:
-                input(f'stop {line_list[-1].strip()}: {stop_id_to_stop_name(line_list[1])}')
-                stops[line_list[-1].strip()] = stop_id_to_stop_name(line_list[1])
+#             if trip.trip_id in line_trip_id:
+#                 input(f'stop {line_list[-1].strip()}: {stop_id_to_stop_name(line_list[1])}')
+#                 stops[line_list[-1].strip()] = stop_id_to_stop_name(line_list[1])
             
-    print(stops)
-    return stops
+#     print(stops)
+#     return stops
 
 def stop_id_to_stop_name(stop_id):
+    """Converts stop ID to user-friendly stop name. If ID not found, 
+    returns empty string.
+
+    Args:
+        stop_id (str): Stop ID code (e.g., 101N).
+
+    Returns:
+        str: Stop name (e.g., Van Cortland Park-242nd St)
+    """    
 
     with open('google_transit/stops.txt') as f:
         for line in f:
@@ -183,6 +219,12 @@ def stop_name_to_stop_id(stop_name):
     return ''
 
 def handle_user_input():
+    """Prompts user for input and calls appropriate method.
+
+    Returns:
+        None.
+    """    
+
     command = input('What would you like to do? ').lower()
     
     if command == 'config':
@@ -206,6 +248,11 @@ def handle_user_input():
         handle_user_input()
 
 def print_title_card():
+    """Prints title card with instructions.
+
+    Returns:
+        None.
+    """    
 
     title_copy='\n**************************************************\n\
 Nick\'s MTA tracker\n\
