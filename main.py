@@ -47,6 +47,7 @@ def help():
 
     print_title_card()
 
+    '''
     confirm = input('Do you want a station reference for your selected train line (y/n)? ')
 
     if confirm == 'y':
@@ -69,6 +70,7 @@ def help():
 
         print()
         time.sleep(1)
+    '''
 
     return None
 
